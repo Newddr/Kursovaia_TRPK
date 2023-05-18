@@ -142,6 +142,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "Form4";
             this.Text = "Договор";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form4_FormClosed);
             this.Load += new System.EventHandler(this.Form4_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

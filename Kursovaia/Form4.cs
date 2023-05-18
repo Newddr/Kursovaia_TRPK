@@ -29,6 +29,7 @@ namespace Kursovaia
         public Form4(int id)
         {
             InitializeComponent();
+            Program.OpenFormsCount++;
             this.id = id;
             label2.Text = $"Договор № {id}";
             MakeContract();
@@ -39,7 +40,7 @@ namespace Kursovaia
             s = new string[6];
             SQLiteConnection connection = new SQLiteConnection(connectionString);
             connection.Open();
-            string sql = $"SELECT startDate,endDate,cost,fioClient,idNotebook,status FROM contracts where id={id}";
+            string sql = $"SELECT startDate,endDate,cost,idNotebook,status FROM contracts where id={id}";
             // Создание объекта SQLiteCommand
             using (SQLiteCommand command = new SQLiteCommand(sql, connection))
             {
@@ -50,13 +51,27 @@ namespace Kursovaia
                     while (reader.Read())
                     {
                         s[0] = reader.GetString(0);
-                        s[1] = reader.GetString(3);
+                        
                         s[3] = (Convert.ToDateTime(reader.GetString(1))- Convert.ToDateTime(reader.GetString(0))).ToString();
                         s[4] = reader.GetInt32(2).ToString();
                         s[5] = s[3];
                         dateEnd = Convert.ToDateTime(reader.GetString(1));
 
-                        idNotebook = reader.GetInt32(4);
+                        string sql1 = $"SELECT fioClient FROM client where id={id}";
+                        // Создание объекта SQLiteCommand
+                        using (SQLiteCommand command1 = new SQLiteCommand(sql1, connection))
+                        {
+                            // Выполнение запроса
+                            using (SQLiteDataReader reader1 = command1.ExecuteReader())
+                            {
+                                // Обработка результата запроса
+                                while (reader1.Read())
+                                {
+                                    s[1] = reader1.GetString(0);
+                                }
+                            }
+                        }
+                                    idNotebook = reader.GetInt32(4);
                         using (SQLiteCommand command1 = new SQLiteCommand($"SELECT name,cost FROM notebooks WHERE id={idNotebook}", connection)) //получаем название ноутбука из таблицы Ноутбуки по его id
                         {
                             using (SQLiteDataReader reader1 = command1.ExecuteReader())
@@ -121,7 +136,18 @@ namespace Kursovaia
                     // Ничего не делаем, если пользователь нажал "Нет" или закрыл диалоговое окно
                 }
             }
-           
+            else
+            {
+                
+                    changeStatusContract();
+                Program.OpenFormsCount--;
+                Form1 form = new Form1(0);
+                    form.Show();
+                    this.Hide();
+                
+
+            }
+
 
         }
         private void changeStatusContract()
@@ -140,6 +166,7 @@ namespace Kursovaia
 
         private void button4_Click(object sender, EventArgs e)
         {
+            Program.OpenFormsCount--;
             Form1 form = new Form1(1);
             form.Show();
             this.Hide();
@@ -147,6 +174,7 @@ namespace Kursovaia
 
         private void button3_Click(object sender, EventArgs e)
         {
+            Program.OpenFormsCount--;
             Form1 form = new Form1(0);
             form.Show();
             this.Hide();
@@ -155,6 +183,17 @@ namespace Kursovaia
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void Form4_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Program.OpenFormsCount--;
+
+            // Проверяем, если все формы закрыты, то завершаем работу приложения
+            if (Program.OpenFormsCount == 0)
+            {
+                Application.Exit();
+            }
         }
     }
 }

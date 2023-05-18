@@ -20,10 +20,11 @@ namespace Kursovaia
         {
 
             InitializeComponent();
-            
+            Program.OpenFormsCount++;
 
             this.task= task;
         }
+
         int task=0;
         string sort = "";
         string filter = "";
@@ -46,6 +47,7 @@ namespace Kursovaia
         }
         private void LoadNotebooks()
         {
+            this.Text = "Список ноутбуков";
             List<FlowLayoutPanel> elements = new List<FlowLayoutPanel>();
             SQLiteConnection connection = new SQLiteConnection(connectionString);
             connection.Open();
@@ -113,6 +115,7 @@ namespace Kursovaia
         }
         private void LoadContract()
         {
+            this.Text = "Договоры";
             List<FlowLayoutPanel> elements = new List<FlowLayoutPanel>();
             SQLiteConnection connection = new SQLiteConnection(connectionString);
             connection.Open();
@@ -140,6 +143,7 @@ namespace Kursovaia
                             }
                         }
                         Label date = new Label();
+                        date.AutoSize = true;
                         date.Text = reader.GetString(2)+" - "+ reader.GetString(3);
                         Label cost = new Label();
                         cost.Text = reader.GetInt32(4).ToString() + " р.";
@@ -161,6 +165,22 @@ namespace Kursovaia
                         {
                             panel_Document_Click(sender, e, id);
                         };
+                        contractId.Click += (sender, e) =>
+                        {
+                            panel_Document_Click(sender, e, id);
+                        };
+                        name.Click += (sender, e) =>
+                        {
+                            panel_Document_Click(sender, e, id);
+                        };
+                        date.Click += (sender, e) =>
+                        {
+                            panel_Document_Click(sender, e, id);
+                        };
+                        status.Click += (sender, e) =>
+                        {
+                            panel_Document_Click(sender, e, id);
+                        };
                     }
                 }
             }
@@ -168,14 +188,14 @@ namespace Kursovaia
         }
         private void panel_Notebook_Click(object sender, EventArgs e,int id)
         {
-            
+            Program.OpenFormsCount--;
             Form2 form2 = new Form2(id); // создание новой формы
             form2.Show();
             this.Hide();
         }
         private void panel_Document_Click(object sender, EventArgs e, int id)
         {
-
+            Program.OpenFormsCount--;
             Form4 form4 = new Form4(id); // создание новой формы
             form4.Show();
             this.Hide();
@@ -298,6 +318,17 @@ namespace Kursovaia
                 panel1.Controls[0].Dispose();
             }
             LoadContract();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Program.OpenFormsCount--;
+
+            // Проверяем, если все формы закрыты, то завершаем работу приложения
+            if (Program.OpenFormsCount == 0)
+            {
+                Application.Exit();
+            }
         }
     }
 }

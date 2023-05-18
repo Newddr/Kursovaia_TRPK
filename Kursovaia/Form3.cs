@@ -18,6 +18,7 @@ namespace Kursovaia
 {
     public partial class Form3 : Form
     {
+        public static int OpenFormsCount=0;
         private PrintDocument printDocument1 = new PrintDocument();
         string model = "";
         int cost = 0;
@@ -27,6 +28,8 @@ namespace Kursovaia
         public Form3(string model,int cost,int idNotebook)
         {
             InitializeComponent();
+            //Program.OpenFormsCount++;
+            OpenFormsCount++;
             this.model = model;
             this.cost = cost;
             this.idNotebook = idNotebook;
@@ -62,14 +65,16 @@ namespace Kursovaia
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        public void button1_Click(object sender, EventArgs e)
         {
             if (textBox1.Text == "" || textBox2.Text == "" || maskedTextBox1.Text == "" || maskedTextBox2.Text == "" || maskedTextBox3.Text == "" || maskedTextBox4.Text == "" || textBox6.Text == "")
             {
-                MessageBox.Show("Не оставляйте поля незаполненными", "Предупреждение", MessageBoxButtons.YesNo);
+                MessageBox.Show("Не оставляйте поля незаполненными", "Предупреждение", MessageBoxButtons.OK);
             }
             else
             {
+                if (Convert.ToInt32(textBox2.Text) < 0) MessageBox.Show("Срок аренды не может быть отрицательным", "Предупреждение", MessageBoxButtons.OK);
+                else { 
                 if (MessageBox.Show("Введенные данные верны и клиент согласен с условиями договора?", "Подтверждение", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     PrintDialog printDialog1 = new PrintDialog();
@@ -83,12 +88,14 @@ namespace Kursovaia
                         //string path = $"C:\\Users\\Федор\\source\\repos\\Kursovaia\\Kursovaia\\bin\\Debug\\Documents\\Document{lastId}.txt";
                         //string content = MakeContract(s);
                         //File.WriteAllText(path, content);
-
+                        //Program.OpenFormsCount--;
+                        OpenFormsCount--;
                         Form1 form = new Form1(0);
                         form.Show();
                         this.Hide();
                     }
                 }
+            }
             }
             
             
@@ -103,29 +110,40 @@ namespace Kursovaia
 
             // Создаем команду для получения последнего id
             string query = "SELECT MAX(id) FROM contracts";
-                SQLiteCommand command = new SQLiteCommand(query, connection);
 
-                // Выполняем запрос и получаем последний id
-                lastId = Convert.ToInt32(command.ExecuteScalar());
+            SQLiteCommand command = new SQLiteCommand(query, connection);
+
+
+            // Выполняем запрос и получаем последний id
+            lastId = Convert.ToInt32(command.ExecuteScalar());
 
                 // Создаем команду для вставки новой строки с id+1
-                query = "INSERT INTO contracts (id,startDate,endDate,cost,fioClient,passportClient,emailClient,phoneNumberClient,idNotebook,status) VALUES (@id,@startDate,@endDate,@cost,@fioClient,@passportClient,@emailClient,@phoneNumberClient,@idNotebook,@status)";
-                command = new SQLiteCommand(query, connection);
+                query = "INSERT INTO contracts (id,startDate,endDate,cost,idNotebook,status) VALUES (@id,@startDate,@endDate,@cost,@idNotebook,@status)";
+            string query1 = "INSERT INTO client (id,fioClient,passportClient,emailClient,phoneNumberClient) VALUES (@id,@fioClient,@passportClient,@emailClient,@phoneNumberClient)";
+
+            command = new SQLiteCommand(query, connection);
 
                 // Устанавливаем параметры для новой строки
                 command.Parameters.AddWithValue("@id", lastId + 1);
                 command.Parameters.AddWithValue("@startDate", s[0]);
                 command.Parameters.AddWithValue("@endDate", s[3]);
                 command.Parameters.AddWithValue("@cost", Convert.ToInt32(s[4])* Convert.ToInt32(s[5]));
-                command.Parameters.AddWithValue("@fioClient", s[1]);
-                command.Parameters.AddWithValue("@passportClient", maskedTextBox2.Text+maskedTextBox3.Text);
-                command.Parameters.AddWithValue("@emailClient",textBox6.Text);
-                command.Parameters.AddWithValue("@phoneNumberClient",maskedTextBox4.Text );
                 command.Parameters.AddWithValue("@idNotebook", idNotebook);
                 command.Parameters.AddWithValue("@status", 0);
 
                 // Выполняем команду вставки новой строки
                 command.ExecuteNonQuery();
+            SQLiteCommand command1 = new SQLiteCommand(query1, connection);
+
+            // Устанавливаем параметры для новой строки
+            command1.Parameters.AddWithValue("@id", lastId + 1);
+            command1.Parameters.AddWithValue("@fioClient", s[1]);
+            command1.Parameters.AddWithValue("@passportClient", maskedTextBox2.Text + maskedTextBox3.Text);
+            command1.Parameters.AddWithValue("@emailClient", textBox6.Text);
+            command1.Parameters.AddWithValue("@phoneNumberClient", maskedTextBox4.Text);
+
+            // Выполняем команду вставки новой строки
+            command1.ExecuteNonQuery();
             connection.Close();
         }
 
@@ -179,6 +197,8 @@ namespace Kursovaia
 
         private void button2_Click(object sender, EventArgs e)
         {
+            //Program.OpenFormsCount--;
+            OpenFormsCount--;
             Form1 form = new Form1(0);
             form.Show();
             this.Hide();
@@ -186,6 +206,8 @@ namespace Kursovaia
 
         private void button3_Click(object sender, EventArgs e)
         {
+            //Program.OpenFormsCount--;
+            OpenFormsCount--;
             Form1 form = new Form1(1);
             form.Show();
             this.Hide();
@@ -280,6 +302,18 @@ namespace Kursovaia
             if (e.KeyCode == Keys.Enter)
             {
                 button1.PerformClick();
+            }
+        }
+
+        private void Form3_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //Program.OpenFormsCount--;
+            OpenFormsCount--;
+
+            // Проверяем, если все формы закрыты, то завершаем работу приложения
+            if (Program.OpenFormsCount == 0)
+            {
+                Application.Exit();
             }
         }
     }

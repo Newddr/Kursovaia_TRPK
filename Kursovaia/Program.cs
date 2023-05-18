@@ -18,5 +18,6 @@ namespace Kursovaia
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1(0));
         }
+        public static int OpenFormsCount = 0;
     }
 }

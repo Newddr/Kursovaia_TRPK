@@ -453,6 +453,7 @@
             this.comments.TabIndex = 43;
             this.comments.Text = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" +
     "FFFFFFFFFFFFF";
+            this.comments.Leave += new System.EventHandler(this.comments_Leave);
             // 
             // Form2
             // 
@@ -499,6 +500,8 @@
             this.Controls.Add(this.panel2);
             this.Name = "Form2";
             this.Text = "Ноутбук";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form2_FormClosing);
+            this.Load += new System.EventHandler(this.Form2_Load);
             ((System.ComponentModel.ISupportInitialize)(this.image)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
