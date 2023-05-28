@@ -453,6 +453,7 @@
             this.comments.TabIndex = 43;
             this.comments.Text = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF" +
     "FFFFFFFFFFFFF";
+            this.comments.TextChanged += new System.EventHandler(this.comments_TextChanged);
             this.comments.Leave += new System.EventHandler(this.comments_Leave);
             // 
             // Form2

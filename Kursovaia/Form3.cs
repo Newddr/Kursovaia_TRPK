@@ -34,7 +34,7 @@ namespace Kursovaia
             this.cost = cost;
             this.idNotebook = idNotebook;
             // настройки печати
-            printDocument1.PrintPage += new PrintPageEventHandler(printDocument1_PrintPage); // подписываемся на событие печати
+            printDocument1.PrintPage += new PrintPageEventHandler(printDocument); // подписываемся на событие печати
             printDocument1.DocumentName = "Print Text"; // имя документа
             printDocument1.DefaultPageSettings.Margins = new Margins(50, 50, 50, 50); // отступы страницы
 
@@ -83,7 +83,8 @@ namespace Kursovaia
                     {
                         // печатаем текст
                         printDocument1.Print();
-                        MakeDocument();
+                        Class1 class1 = new Class1();
+                        class1.MakeDocument(lastId,idNotebook,s);
                         // сохранение договора
                         //string path = $"C:\\Users\\Федор\\source\\repos\\Kursovaia\\Kursovaia\\bin\\Debug\\Documents\\Document{lastId}.txt";
                         //string content = MakeContract(s);
@@ -100,65 +101,23 @@ namespace Kursovaia
             
             
         }
-        private void MakeDocument()
-        {
-            string connectionString = "Data Source=databaseCompany.db;";
+       
 
-
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-            connection.Open();
-
-            // Создаем команду для получения последнего id
-            string query = "SELECT MAX(id) FROM contracts";
-
-            SQLiteCommand command = new SQLiteCommand(query, connection);
-
-
-            // Выполняем запрос и получаем последний id
-            lastId = Convert.ToInt32(command.ExecuteScalar());
-
-                // Создаем команду для вставки новой строки с id+1
-                query = "INSERT INTO contracts (id,startDate,endDate,cost,idNotebook,status) VALUES (@id,@startDate,@endDate,@cost,@idNotebook,@status)";
-            string query1 = "INSERT INTO client (id,fioClient,passportClient,emailClient,phoneNumberClient) VALUES (@id,@fioClient,@passportClient,@emailClient,@phoneNumberClient)";
-
-            command = new SQLiteCommand(query, connection);
-
-                // Устанавливаем параметры для новой строки
-                command.Parameters.AddWithValue("@id", lastId + 1);
-                command.Parameters.AddWithValue("@startDate", s[0]);
-                command.Parameters.AddWithValue("@endDate", s[3]);
-                command.Parameters.AddWithValue("@cost", Convert.ToInt32(s[4])* Convert.ToInt32(s[5]));
-                command.Parameters.AddWithValue("@idNotebook", idNotebook);
-                command.Parameters.AddWithValue("@status", 0);
-
-                // Выполняем команду вставки новой строки
-                command.ExecuteNonQuery();
-            SQLiteCommand command1 = new SQLiteCommand(query1, connection);
-
-            // Устанавливаем параметры для новой строки
-            command1.Parameters.AddWithValue("@id", lastId + 1);
-            command1.Parameters.AddWithValue("@fioClient", s[1]);
-            command1.Parameters.AddWithValue("@passportClient", maskedTextBox2.Text + maskedTextBox3.Text);
-            command1.Parameters.AddWithValue("@emailClient", textBox6.Text);
-            command1.Parameters.AddWithValue("@phoneNumberClient", maskedTextBox4.Text);
-
-            // Выполняем команду вставки новой строки
-            command1.ExecuteNonQuery();
-            connection.Close();
-        }
-
-        private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
+        private void printDocument(object sender, PrintPageEventArgs e)
         {
             int days = Convert.ToInt32(textBox2.Text);
-            s= new string[6]
+            s= new string[10]
             {
                 DateTime.Today.ToString("dd/MM/yyyy"),// сегодняшняя дата 
                 textBox1.Text.ToString(),// фио клиента
                 model, // модель ноутбука
                 DateTime.Today.AddDays(days).ToString("dd/MM/yyyy"), // дата окончания
                 cost.ToString(), // стоимость
-                days.ToString() // количество дне аренды
-
+                days.ToString(), // количество дне аренды
+                maskedTextBox2.Text,
+                maskedTextBox3.Text,
+                textBox6.Text,
+                maskedTextBox4.Text
             };
             // печатаем текст
             string text = MakeContract(s);
@@ -174,31 +133,11 @@ namespace Kursovaia
             }
         }
 
-        private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!Char.IsDigit(e.KeyChar) && e.KeyChar != 8) // проверяем, является ли нажатая клавиша цифрой или клавишей Backspace
-            {
-                e.Handled = true; // если нет, то отменяем ее обработку
-            }
-        }
-
-        private void textBox4_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!Char.IsDigit(e.KeyChar) && e.KeyChar != 8) // проверяем, является ли нажатая клавиша цифрой или клавишей Backspace
-            {
-                e.Handled = true; // если нет, то отменяем ее обработку
-            }
-        }
-
-        private void Ljuj(object sender, EventArgs e)
-        {
-
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //Program.OpenFormsCount--;
-            OpenFormsCount--;
+            Program.OpenFormsCount--;
+            //OpenFormsCount--;
             Form1 form = new Form1(0);
             form.Show();
             this.Hide();
@@ -206,8 +145,8 @@ namespace Kursovaia
 
         private void button3_Click(object sender, EventArgs e)
         {
-            //Program.OpenFormsCount--;
-            OpenFormsCount--;
+            Program.OpenFormsCount--;
+            //OpenFormsCount--;
             Form1 form = new Form1(1);
             form.Show();
             this.Hide();
@@ -215,13 +154,7 @@ namespace Kursovaia
 
         
 
-        private void textBox7_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!Char.IsDigit(e.KeyChar) && e.KeyChar != 8 && e.KeyChar != '+') // проверяем, является ли нажатая клавиша цифрой или клавишей Backspace
-            {
-                e.Handled = true; // если нет, то отменяем ее обработку
-            }
-        }
+
 
         private void label1_Click_1(object sender, EventArgs e)
         {
@@ -307,8 +240,8 @@ namespace Kursovaia
 
         private void Form3_FormClosed(object sender, FormClosedEventArgs e)
         {
-            //Program.OpenFormsCount--;
-            OpenFormsCount--;
+            Program.OpenFormsCount--;
+            //OpenFormsCount--;
 
             // Проверяем, если все формы закрыты, то завершаем работу приложения
             if (Program.OpenFormsCount == 0)

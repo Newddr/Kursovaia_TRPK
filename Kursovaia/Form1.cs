@@ -49,34 +49,28 @@ namespace Kursovaia
         {
             this.Text = "Список ноутбуков";
             List<FlowLayoutPanel> elements = new List<FlowLayoutPanel>();
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-            connection.Open();
-            string sql = $"SELECT name,image,cost,description,id FROM notebooks {filter} {sort} ";
-            // Создание объекта SQLiteCommand
-            using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-            {
-                // Выполнение запроса
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
+            
+                    Class1 class1= new Class1();
+                    List<String[]> param = class1.GetInfoFromBD("notebooks", filter, sort);
                     // Обработка результата запроса
-                    while (reader.Read())
+                    foreach (String[] s in param)
                     {
                         
                         
                         PictureBox pictureBox = new PictureBox(); // Создание нового PictureBox
-                        pictureBox.Image = Image.FromFile(reader.GetString(1));
+                        pictureBox.Image = Image.FromFile(s[2]);
                         pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
                         Label name = new Label();
                         name.Padding = new Padding(0, 20, 0, 0);
                         name.Height= pictureBox.Height;
-                        name.Text = reader.GetString(0);
+                        name.Text = s[1];
                         Label description = new Label();
 
                         description.Width = 550;
                         description.Height = 140;
-                        description.Text = reader.GetString(3);
+                        description.Text =s[4];
                         Label cost = new Label();
-                        cost.Text = reader.GetInt32(2).ToString() + " р/день";
+                        cost.Text = s[5] + " р/день";
                         FlowLayoutPanel element = new FlowLayoutPanel();
                         
                         element.Controls.Add(pictureBox);
@@ -85,7 +79,7 @@ namespace Kursovaia
                         element.Controls.Add(cost);
                         element.Dock = DockStyle.Top;
 
-                        int id = reader.GetInt32(4);
+                        int id = Convert.ToInt32(s[0]);
                         name.Click += (sender, e) =>
                         {
                             panel_Notebook_Click(sender, e, id);
@@ -109,47 +103,32 @@ namespace Kursovaia
                         panel1.Controls.Add(element);
                         elements.Add(element);
                     }
-                }
-            }
-            connection.Close();
+                
+            
+           
         }
+
         private void LoadContract()
         {
             this.Text = "Договоры";
             List<FlowLayoutPanel> elements = new List<FlowLayoutPanel>();
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-            connection.Open();
-            string sql = $"SELECT id,idNotebook,startDate,endDate,cost,status FROM contracts {filter} {sort}";
-            // Создание объекта SQLiteCommand
-            using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-            {
-                // Выполнение запроса
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
+                    Class1 class1 = new Class1();
+                    List<String[]> param = class1.GetInfoFromBD("contracts", filter, sort);
                     // Обработка результата запроса
-                    while (reader.Read())
+                    foreach (String[] s in param)
                     {
                         Label contractId = new Label();
-                        contractId.Text="№ "+ reader.GetInt32(0).ToString();
+                        contractId.Text="№ "+ s[0];
                         Label name = new Label();
-                        using (SQLiteCommand command1 = new SQLiteCommand($"SELECT name FROM notebooks WHERE id={reader.GetInt32(1)}", connection)) //получаем название ноутбука из таблицы Ноутбуки по его id
-                        {
-                            using (SQLiteDataReader reader1 = command1.ExecuteReader())
-                            {
-                                while (reader1.Read())
-                                {
-                                    name.Text = reader1.GetString(0);
-                                }
-                            }
-                        }
+                        name.Text = s[5];
                         Label date = new Label();
                         date.AutoSize = true;
-                        date.Text = reader.GetString(2)+" - "+ reader.GetString(3);
+                        date.Text =s[1] +" - "+ s[2];
                         Label cost = new Label();
-                        cost.Text = reader.GetInt32(4).ToString() + " р.";
+                        cost.Text = s[3] + " р.";
                         Label status = new Label();
-                        if (reader.GetInt32(5) == 1) status.Text = "Выполнен";
-                        else status.Text = "Не выполнен";
+                        status.Text = s[4];
+                        
                         
                         FlowLayoutPanel element = new FlowLayoutPanel();
                         element.Controls.Add(contractId);
@@ -160,7 +139,7 @@ namespace Kursovaia
                         element.Dock = DockStyle.Top;
                         panel1.Controls.Add(element);
                         elements.Add(element);
-                        int id = reader.GetInt32(0);
+                        int id = Convert.ToInt32(s[0]);
                         cost.Click += (sender, e) =>
                         {
                             panel_Document_Click(sender, e, id);
@@ -182,9 +161,6 @@ namespace Kursovaia
                             panel_Document_Click(sender, e, id);
                         };
                     }
-                }
-            }
-            connection.Close();
         }
         private void panel_Notebook_Click(object sender, EventArgs e,int id)
         {

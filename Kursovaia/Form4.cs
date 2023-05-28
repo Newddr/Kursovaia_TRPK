@@ -37,70 +37,9 @@ namespace Kursovaia
         }
         private void MakeContract()
         {
-            s = new string[6];
-            SQLiteConnection connection = new SQLiteConnection(connectionString);
-            connection.Open();
-            string sql = $"SELECT startDate,endDate,cost,idNotebook,status FROM contracts where id={id}";
-            // Создание объекта SQLiteCommand
-            using (SQLiteCommand command = new SQLiteCommand(sql, connection))
-            {
-                // Выполнение запроса
-                using (SQLiteDataReader reader = command.ExecuteReader())
-                {
-                    // Обработка результата запроса
-                    while (reader.Read())
-                    {
-                        s[0] = reader.GetString(0);
-                        
-                        s[3] = (Convert.ToDateTime(reader.GetString(1))- Convert.ToDateTime(reader.GetString(0))).ToString();
-                        s[4] = reader.GetInt32(2).ToString();
-                        s[5] = s[3];
-                        dateEnd = Convert.ToDateTime(reader.GetString(1));
-
-                        string sql1 = $"SELECT fioClient FROM client where id={id}";
-                        // Создание объекта SQLiteCommand
-                        using (SQLiteCommand command1 = new SQLiteCommand(sql1, connection))
-                        {
-                            // Выполнение запроса
-                            using (SQLiteDataReader reader1 = command1.ExecuteReader())
-                            {
-                                // Обработка результата запроса
-                                while (reader1.Read())
-                                {
-                                    s[1] = reader1.GetString(0);
-                                }
-                            }
-                        }
-                                    idNotebook = reader.GetInt32(4);
-                        using (SQLiteCommand command1 = new SQLiteCommand($"SELECT name,cost FROM notebooks WHERE id={idNotebook}", connection)) //получаем название ноутбука из таблицы Ноутбуки по его id
-                        {
-                            using (SQLiteDataReader reader1 = command1.ExecuteReader())
-                            {
-                                while (reader1.Read())
-                                {
-                                    s[2] = reader1.GetString(0);
-                                    costPerDay = reader1.GetInt32(1);
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-            string filePath = "document1.txt";
-
-            // Прочитайте текст из файла
-            string text = File.ReadAllText(filePath);
-            int replaceIndex = 0;
-            int index = 0;
-
-            while ((replaceIndex = text.IndexOf("?!?", replaceIndex)) != -1)
-            {
-                text = text.Remove(replaceIndex, 3);
-                text = text.Insert(replaceIndex, s[index]);
-                index++;
-            }
-            label1.Text = text;
+            ClassLogic classLogic = new ClassLogic();
+            label1.Text = classLogic.makeContract(id);
+        
         }
 
         private void Form4_Load(object sender, EventArgs e)
@@ -110,7 +49,9 @@ namespace Kursovaia
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form2 form = new Form2(idNotebook);
+            Class1 class1 = new Class1();
+            String[] s = class1.GetInfoForDocument(id);
+            Form2 form = new Form2(Convert.ToInt32(s[8]));
             form.button_1.Visible = false;
             form.button_2.Visible = false;
             form.button_3.Visible = false;
@@ -119,14 +60,18 @@ namespace Kursovaia
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if(DateTime.Today>dateEnd)
+            Class1 class1 = new Class1();
+            String[] s = class1.GetInfoForDocument(id);
+            if (DateTime.Today > Convert.ToDateTime(s[6]))
             {
-                var days = DateTime.Today.Subtract(dateEnd).Days;
-                var addCost = costPerDay * days;
+                
+                var days = DateTime.Today.Subtract(Convert.ToDateTime(s[6])).Days;
+                var addCost = Convert.ToInt32(s[7]) * days;
                 DialogResult result = MessageBox.Show($"Дата возврата не совпадает с датой указанной в договоре. Просрочка составляет {days} дней.Взимите дополнительную плату в размере {addCost} рублей", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
-                    changeStatusContract();
+                    
+                    class1.changeStatusContract(id);
                     Form1 form = new Form1(0);
                     form.Show();
                     this.Hide();
@@ -138,8 +83,9 @@ namespace Kursovaia
             }
             else
             {
-                
-                    changeStatusContract();
+
+               
+                class1.changeStatusContract(id);
                 Program.OpenFormsCount--;
                 Form1 form = new Form1(0);
                     form.Show();
@@ -150,19 +96,7 @@ namespace Kursovaia
 
 
         }
-        private void changeStatusContract()
-        {
-            
-            
-            string query = $"UPDATE contracts SET status=1 WHERE id={id}";
-
-            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-            {
-                SQLiteCommand command = new SQLiteCommand(query, connection);
-                connection.Open();
-                command.ExecuteNonQuery();
-            }
-        }
+       
 
         private void button4_Click(object sender, EventArgs e)
         {

@@ -121,7 +121,6 @@
             this.button2.TabIndex = 10;
             this.button2.Text = "Каталог";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.TextChanged += new System.EventHandler(this.Ljuj);
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
